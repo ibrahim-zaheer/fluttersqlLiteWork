@@ -1,29 +1,63 @@
 import 'package:flutter/material.dart';
-import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart';
+import 'package:sqliteworker/SQLhelper.dart';
+// import 'd';
 
-Future<void> main() async {
-  // Open the database (or create if it doesn't exist)
-  Database database = await openDatabase(
-    join(await getDatabasesPath(), 'example_database.db'),
-    onCreate: (db, version) {
-      return db.execute(
-        'CREATE TABLE my_table(id INTEGER PRIMARY KEY, name TEXT)',
-      );
-    },
-    version: 1,
-  );
+void main() => runApp(MyApp());
 
-  // Insert some data into the table
-  await database.insert(
-    'my_table',
-    {'name': 'John Doe'},
-    conflictAlgorithm: ConflictAlgorithm.replace,
-  );
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: MyHomePage(),
+    );
+  }
+}
 
-  // Query the database for all rows
-  List<Map<String, dynamic>> results = await database.query('my_table');
+class MyHomePage extends StatefulWidget {
+  @override
+  _MyHomePageState createState() => _MyHomePageState();
+}
 
-  // Print the results
-  print(results);
+class _MyHomePageState extends State<MyHomePage> {
+  DBHelper dbHelper = DBHelper();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('SQFlite Example'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            ElevatedButton(
+              onPressed: () async {
+                // Insert user data
+                await dbHelper.insertUser({'name': 'John Doe', 'age': 26});
+                print('User inserted');
+              },
+              child: Text('Insert User'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                // Retrieve users from the database
+                List<Map<String, dynamic>> users = await dbHelper.getUsers();
+                print('Users: $users');
+              },
+              child: Text('Retrieve Users'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                // Delete user with ID 1
+                await dbHelper.deleteUser(1);
+                print('User deleted');
+              },
+              child: Text('Delete User'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
